@@ -1,0 +1,370 @@
+@import "katex/dist/katex.min.css";
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;200;300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sora: 'Sora', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    /* * Calendar & Components */
+    --calendar-active-bg: 199 89% 87%;
+    --calendar-active-fg: 0 0% 0%;
+    --rbc-button-bg: 242 100% 97%;
+    --rbc-active-bg: 242 91% 92%;
+    --rbc-slot-bg: 197 100% 98%;
+    --event-1: 194 100% 94%;
+    --event-2: 54 94% 96%;
+    --event-3: 244 100% 97%;
+    --event-4: 312 80% 97%;
+  }
+
+  .dark {
+    --background: 222.2 47.4% 4.1%; /* ! Deep Corporate Slate */
+    --foreground: 210 40% 98%;
+    --card: 222.2 47.4% 6.1%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 47.4% 6.1%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 25%;
+    --input: 217.2 32.6% 25%;
+    --ring: 224.3 76.3% 48%;
+
+    /* * Calendar & Components - Dark Mode */
+    --calendar-active-bg: 217 91% 60%;
+    --calendar-active-fg: 222 47% 11%;
+    --rbc-button-bg: 217 32% 17%;
+    --rbc-active-bg: 217 32% 25%;
+    --rbc-slot-bg: 222 47% 7%;
+    --event-1: 217 32% 20%;
+    --event-2: 45 40% 20%;
+    --event-3: 260 30% 20%;
+    --event-4: 320 30% 20%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    font-family: var(--font-sora), 'Sora', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  }
+  html,
+  body {
+    font-family: var(--font-sora), 'Sora', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  input,
+  button,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+}
+
+.acadeal-markdown .katex,
+.acadeal-markdown .katex * {
+  font-family: KaTeX_Main, "Times New Roman", serif !important;
+}
+
+.acadeal-markdown .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.35rem 0.1rem;
+}
+
+.acadeal-markdown img {
+  height: auto;
+  max-width: 100%;
+  margin: 0.75rem 0;
+  border-radius: 0.75rem;
+}
+
+/* ! Calendar Styles */
+.react-calendar {
+  width: 100% !important;
+  border: none !important;
+  font-family: var(--font-sora), 'Sora', sans-serif !important;
+}
+
+.react-calendar__navigation__label__labelText {
+  font-weight: 600;
+}
+
+.react-calendar__tile--active {
+  background-color: hsl(var(--calendar-active-bg)) !important;
+  color: hsl(var(--calendar-active-fg)) !important;
+}
+
+/* ! Big Calendar Styles */
+.rbc-btn-group:first-child {
+  display: none !important;
+}
+
+.rbc-toolbar-label {
+  text-align: right !important;
+  padding: 0px 20px !important;
+}
+
+.rbc-btn-group:last-child {
+  font-size: 13px !important;
+}
+
+.rbc-btn-group:last-child button {
+  border: none !important;
+  background-color: hsl(var(--rbc-button-bg)) !important;
+  color: hsl(var(--foreground)) !important;
+  margin-left: 2px !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: hsl(var(--rbc-active-bg)) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: none !important;
+}
+
+.rbc-time-view {
+  border-color: hsl(var(--border)) !important;
+}
+
+.rbc-time-header {
+  display: none !important;
+}
+
+.rbc-time-content {
+  border: none !important;
+}
+
+.rbc-time-gutter.rbc-time-column {
+  font-size: 12px !important;
+}
+
+.rbc-time-gutter.rbc-time-column .rbc-timeslot-group {
+  padding: 0px 20px !important;
+}
+
+.rbc-timeslot-group {
+  background-color: hsl(var(--rbc-slot-bg)) !important;
+}
+
+.rbc-day-slot {
+  font-size: 14px !important;
+}
+
+.rbc-event {
+  border: none !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 10px !important;
+  margin: 10px !important;
+  width: 99% !important;
+}
+
+.rbc-event:nth-child(1) {
+  background-color: hsl(var(--event-1)) !important;
+}
+.rbc-event:nth-child(2) {
+  background-color: hsl(var(--event-2)) !important;
+}
+.rbc-event:nth-child(3) {
+  background-color: hsl(var(--event-3)) !important;
+}
+.rbc-event:nth-child(4) {
+  background-color: hsl(var(--event-4)) !important;
+}
+.rbc-event:nth-child(5) {
+  background-color: hsl(var(--event-1)) !important;
+}
+.rbc-event:nth-child(6) {
+  background-color: hsl(var(--event-2)) !important;
+}
+.rbc-event:nth-child(7) {
+  background-color: hsl(var(--event-3)) !important;
+}
+.rbc-event:nth-child(8) {
+  background-color: hsl(var(--event-4)) !important;
+}
+
+.rbc-event-label {
+  color: gray !important;
+  margin-bottom: 5px;
+}
+
+/* ! React DatePicker Custom Styles */
+.react-datepicker {
+  font-family: var(--font-sora), 'Sora', sans-serif !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.react-datepicker__header {
+  background-color: hsl(var(--primary)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.4rem 0.4rem 0 0 !important;
+  padding-top: 0.75rem !important;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name,
+.react-datepicker-time__header {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__day {
+  color: hsl(var(--foreground)) !important;
+  border-radius: 0.25rem !important;
+  margin: 0.125rem !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: hsl(var(--primary)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__day--today {
+  font-weight: 600 !important;
+  background-color: hsl(var(--accent)) !important;
+}
+
+.react-datepicker__day--disabled {
+  color: hsl(var(--muted-foreground)) !important;
+  opacity: 0.5 !important;
+}
+
+.react-datepicker__navigation {
+  top: 0.75rem !important;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: white !important;
+}
+
+.react-datepicker__month-dropdown,
+.react-datepicker__year-dropdown {
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.375rem !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.react-datepicker__month-option,
+.react-datepicker__year-option {
+  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--card)) !important;
+}
+
+.react-datepicker__month-option:hover,
+.react-datepicker__year-option:hover {
+  background-color: hsl(var(--accent)) !important;
+}
+
+.react-datepicker__month-option--selected,
+.react-datepicker__year-option--selected {
+  background-color: hsl(var(--primary)) !important;
+  color: white !important;
+}
+
+.react-datepicker__time-container {
+  border-left: 1px solid hsl(var(--border)) !important;
+  background-color: hsl(var(--card)) !important;
+}
+
+.react-datepicker__time {
+  background-color: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.react-datepicker__time-box {
+  background-color: hsl(var(--card)) !important;
+}
+
+.react-datepicker__time-list-item {
+  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--card)) !important;
+}
+
+.react-datepicker__time-list-item:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: hsl(var(--primary)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+/* * Ensure native select options are readable in dark mode */
+.dark select {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.dark option {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+/* ! Next.js Portal Positioning Override */
+nextjs-portal {
+  left: auto !important;
+  top: auto !important;
+}
+
+/* * Pop-out windows: the `data-popout` attribute is stamped on <html> by the
+   pre-paint script in the root layout, so app chrome is hidden before the first
+   frame rather than unmounting after hydration (which would flash). */
+[data-popout="1"] .popout-hide {
+  display: none !important;
+}
+
+/* * Detached windows are narrow and single-purpose — reclaim the page padding */
+[data-popout="1"] .popout-main {
+  padding: 1rem;
+}
