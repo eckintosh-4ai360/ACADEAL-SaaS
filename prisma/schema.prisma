@@ -1,0 +1,1753 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id          String    @id @default(uuid())
+  username    String    @unique
+  staffId     String    @unique
+  staffProfileId String? @unique
+  password    String
+  name        String
+  email       String?   @unique
+  phone       String?
+  img         String?
+  role        AdminRole @default(ADMIN)
+  permissions Json? // { recordStudents, editFeeRecords, statement, prepareBill, admissions, paymentList, generateBill, arrearsPDF, schoolFees, receipt, viewDetail, expenses, income, specialFeesOffer, busFee, feedingFee, salary, salaryAdvance, financialReport, message }
+  staffProfile Staff?   @relation("AdminStaffProfile", fields: [staffProfileId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum StaffType {
+  ADMIN
+  TEACHER
+}
+
+model Staff {
+  id           String     @id @default(uuid())
+  staffId      String     @unique
+  username     String
+  password     String
+  name         String
+  surname      String?
+  email        String?
+  phone        String?
+  address      String?
+  img          String?
+  sex          UserSex?
+  birthday     DateTime?
+  permissions  Json?
+  staffType    StaffType
+  adminRole    AdminRole?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  admin        Admin?     @relation("AdminStaffProfile")
+  teacher      Teacher?   @relation("TeacherStaffProfile")
+
+  @@unique([staffType, username])
+  @@index([staffType, name, surname])
+  @@index([email])
+  @@index([phone])
+}
+
+enum LibraryCatalogItemType {
+  BOOK
+  DIGITAL_RESOURCE
+}
+
+enum LibraryCatalogAvailability {
+  AVAILABLE
+  LIMITED
+  UNAVAILABLE
+}
+
+model Student {
+  id                    String                 @id @default(uuid())
+  username              String                 @unique
+  studentId             String                 @unique
+  password              String
+  name                  String
+  surname               String
+  otherNames            String?
+  email                 String?                @unique
+  phone                 String?                @unique
+  address               String?
+  img                   String?
+  bloodType             String?
+  sex                   UserSex
+  birthday              DateTime
+  residencyStatus       String                 @default("DAY")
+  house                 String?
+  guardianName          String?
+  contactNumber         String?
+  occupation            String?
+  nhisNumber            String?
+  admissionDate         DateTime?
+  emergencyContact      String?
+  nationality           String?
+  firstLanguage         String?
+  enrollmentDate        DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  parentId              String?
+  parent                Parent?                @relation(fields: [parentId], references: [id])
+  classId               Int
+  class                 Class                  @relation(fields: [classId], references: [id])
+  gradeId               Int
+  grade                 Grade                  @relation(fields: [gradeId], references: [id])
+  attendances           Attendance[]
+  results               Result[]
+  fees                  Fee[]
+  feePayments           FeePayment[]
+  behaviors             Behavior[]
+  medicalInfo           MedicalInfo?
+  documents             Document[]
+  comments              Comment[]
+  studentAnswers        StudentAnswer[]
+  examAnswers           StudentExamAnswer[]
+  aiQuizAttempts        AiQuizAttempt[]
+  savedReportCards      SavedReportCard[]
+  reportCardEntries     ReportCardEntry[]
+  parentTeacherMeetings ParentTeacherMeeting[]
+  excursionPayments     ExcursionPayment[]
+  feeCollectionPayments FeeCollectionPayment[]
+  libraryBorrows        LibraryBorrow[]
+  studentBills          StudentBill[]
+}
+
+model Teacher {
+  id                    String                 @id @default(uuid())
+  username              String                 @unique
+  staffId               String                 @unique
+  staffProfileId        String?                @unique
+  password              String
+  name                  String
+  surname               String
+  email                 String?                @unique
+  phone                 String?                @unique
+  address               String
+  img                   String?
+  sex                   UserSex
+  birthday              DateTime
+  permissions           Json? // { recordStudents, editFeeRecords, statement, prepareBill, admissions, paymentList, generateBill, arrearsPDF, schoolFees, receipt, viewDetail, expenses, income, specialFeesOffer, busFee, feedingFee, salary, salaryAdvance, financialReport, message }
+  staffProfile          Staff?                 @relation("TeacherStaffProfile", fields: [staffProfileId], references: [id], onDelete: SetNull)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  subjects              Subject[]
+  lessons               Lesson[]
+  classes               Class[]
+  subjectAssignments    ClassSubjectTeacher[]
+  aiQuestionPacks       AiQuestionPack[]
+  parentTeacherMeetings ParentTeacherMeeting[]
+  meetingAvailabilities MeetingAvailability[]
+  timetableEntries      TimetableEntry[]
+}
+
+model Parent {
+  id                    String                 @id @default(uuid())
+  username              String                 @unique
+  parentUserId          String?                @unique
+  password              String
+  name                  String
+  surname               String
+  email                 String?                @unique
+  phone                 String
+  address               String?
+  img                   String?
+  isProfileComplete     Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  students              Student[]
+  parentTeacherMeetings ParentTeacherMeeting[]
+}
+
+model Grade {
+  id           Int              @id @default(autoincrement())
+  level        Int              @unique
+  students     Student[]
+  classes      Class[]
+  syllabi      CourseSyllabus[]
+  videoLessons VideoLesson[]
+}
+
+model Class {
+  id                        Int                   @id @default(autoincrement())
+  name                      String                @unique
+  capacity                  Int
+  supervisorId              String?
+  supervisor                Teacher?              @relation(fields: [supervisorId], references: [id])
+  gradeId                   Int
+  grade                     Grade                 @relation(fields: [gradeId], references: [id])
+  lessons                   Lesson[]
+  students                  Student[]
+  subjectTeacherAssignments ClassSubjectTeacher[]
+  excursionCampaigns        ExcursionCampaign[]
+  feeCollectionCampaigns    FeeCollectionCampaign[]
+  events                    Event[]
+  announcements             Announcement[]
+  notifications             Notification[]
+  scheduleTimetables        ScheduleTimetable[]
+}
+
+model Subject {
+  id                      Int                   @id @default(autoincrement())
+  name                    String                @unique
+  teachers                Teacher[]
+  lessons                 Lesson[]
+  classTeacherAssignments ClassSubjectTeacher[]
+  syllabi                 CourseSyllabus[]
+  videoLessons            VideoLesson[]
+  timetableEntries        TimetableEntry[]
+}
+
+model ClassSubjectTeacher {
+  id        Int      @id @default(autoincrement())
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId Int
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([classId, subjectId])
+  @@index([teacherId])
+  @@index([subjectId])
+}
+
+model Lesson {
+  id          Int          @id @default(autoincrement())
+  name        String
+  day         Day
+  startTime   DateTime
+  endTime     DateTime
+  subjectId   Int
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  classId     Int
+  class       Class        @relation(fields: [classId], references: [id])
+  teacherId   String
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  exams       Exam[]
+  assignments Assignment[]
+  attendances Attendance[]
+}
+
+model Exam {
+  id        Int            @id @default(autoincrement())
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  lessonId  Int
+  lesson    Lesson         @relation(fields: [lessonId], references: [id])
+  results   Result[]
+  questions ExamQuestion[]
+}
+
+model ExamQuestion {
+  id           Int                  @id @default(autoincrement())
+  examId       Int
+  exam         Exam                 @relation(fields: [examId], references: [id], onDelete: Cascade)
+  questionType QuestionType
+  questionText String               @db.Text
+  points       Int                  @default(10)
+  fileUrl      String?
+  fileType     String?
+  options      ExamQuestionOption[]
+  answers      StudentExamAnswer[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+}
+
+model ExamQuestionOption {
+  id         Int                 @id @default(autoincrement())
+  questionId Int
+  question   ExamQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionText String              @db.Text
+  isCorrect  Boolean             @default(false)
+  createdAt  DateTime            @default(now())
+  selectedBy StudentExamAnswer[]
+}
+
+model StudentExamAnswer {
+  id               Int                 @id @default(autoincrement())
+  studentId        String
+  student          Student             @relation(fields: [studentId], references: [id])
+  questionId       Int
+  question         ExamQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerText       String?             @db.Text
+  selectedOptionId Int?
+  selectedOption   ExamQuestionOption? @relation(fields: [selectedOptionId], references: [id])
+  isCorrect        Boolean?
+  pointsEarned     Int                 @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([studentId, questionId])
+}
+
+model Assignment {
+  id        Int                  @id @default(autoincrement())
+  title     String
+  startDate DateTime
+  dueDate   DateTime
+  lessonId  Int
+  lesson    Lesson               @relation(fields: [lessonId], references: [id])
+  results   Result[]
+  questions AssignmentQuestion[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @default(now()) @updatedAt
+}
+
+model AssignmentQuestion {
+  id           Int              @id @default(autoincrement())
+  assignmentId Int
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  questionType QuestionType
+  questionText String           @db.Text
+  points       Int              @default(10)
+  fileUrl      String?
+  fileType     String?
+  options      QuestionOption[]
+  answers      StudentAnswer[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model QuestionOption {
+  id         Int                @id @default(autoincrement())
+  questionId Int
+  question   AssignmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionText String             @db.Text
+  isCorrect  Boolean            @default(false)
+  createdAt  DateTime           @default(now())
+  selectedBy StudentAnswer[]
+}
+
+model Result {
+  id           Int         @id @default(autoincrement())
+  score        Int
+  examId       Int?
+  exam         Exam?       @relation(fields: [examId], references: [id])
+  assignmentId Int?
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id])
+  studentId    String
+  student      Student     @relation(fields: [studentId], references: [id])
+
+  @@unique([assignmentId, studentId])
+  @@unique([examId, studentId])
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  present   Boolean
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  lessonId  Int
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  startTime   DateTime
+  endTime     DateTime
+  classId     Int?
+  class       Class?   @relation(fields: [classId], references: [id])
+}
+
+model Announcement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  date        DateTime
+  classId     Int?
+  class       Class?   @relation(fields: [classId], references: [id])
+}
+
+model Fee {
+  id            Int            @id @default(autoincrement())
+  title         String
+  amount        Float
+  paidAmount    Float          @default(0)
+  dueDate       DateTime
+  status        FeeStatus      @default(PENDING)
+  paymentMethod PaymentMethod?
+  description   String?        @db.Text
+  term          String         @default("")
+  academicYear  String         @default("")
+  studentId     String
+  student       Student        @relation(fields: [studentId], references: [id])
+  payments      FeePayment[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model FeePayment {
+  id            Int           @id @default(autoincrement())
+  studentId     String
+  student       Student       @relation(fields: [studentId], references: [id])
+  feeId         Int?
+  fee           Fee?          @relation(fields: [feeId], references: [id], onDelete: SetNull)
+  amount        Float
+  paymentMethod PaymentMethod @default(CASH)
+  receiptNumber String        @unique
+  term          String        @default("")
+  academicYear  String        @default("")
+  recordedBy    String        @default("admin")
+  notes         String?       @db.Text
+  paidAt        DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  receiptDeliveries ReceiptDelivery[]
+
+  @@index([studentId, paidAt])
+  @@index([feeId])
+}
+
+enum ReceiptDeliveryChannel {
+  SMS
+  WHATSAPP
+}
+
+enum ReceiptDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model ReceiptDelivery {
+  id           Int                   @id @default(autoincrement())
+  feePaymentId Int
+  feePayment   FeePayment            @relation(fields: [feePaymentId], references: [id], onDelete: Cascade)
+  channel      ReceiptDeliveryChannel
+  recipient    String
+  message      String                @db.Text
+  receiptUrl   String
+  status       ReceiptDeliveryStatus @default(PENDING)
+  error        String?               @db.Text
+  sentAt       DateTime?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@index([feePaymentId])
+  @@index([recipient, createdAt])
+  @@index([status, createdAt])
+}
+
+enum FinanceEntryType {
+  INCOME
+  EXPENSE
+}
+
+model FinanceEntry {
+  id             Int              @id @default(autoincrement())
+  type           FinanceEntryType
+  category       String
+  amount         Float
+  description    String           @db.Text
+  paymentMethod  PaymentMethod    @default(CASH)
+  entryDate      DateTime         @default(now())
+  recordedById   String
+  recordedByName String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([type, entryDate])
+  @@index([category])
+  @@index([entryDate])
+}
+
+model TermBill {
+  id           Int            @id @default(autoincrement())
+  level        String
+  term         String
+  academicYear String
+  totalAmount  Float          @default(0)
+  items        TermBillItem[]
+  studentBills StudentBill[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([level, term, academicYear])
+}
+
+model TermBillItem {
+  id         Int      @id @default(autoincrement())
+  termBillId Int
+  termBill   TermBill @relation(fields: [termBillId], references: [id], onDelete: Cascade)
+  itemName   String
+  amount     Float
+}
+
+// ─── Student Bills ──────────────────────────────────────────────────────────
+
+model StudentBill {
+  id             Int       @id @default(autoincrement())
+  studentId      String
+  student        Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  termBillId     Int?      //* The Prepare Bill template it was generated from
+  termBill       TermBill? @relation(fields: [termBillId], references: [id], onDelete: SetNull)
+  term           String
+  academicYear   String
+  //* Snapshot taken when the bill is generated, so a published bill does not
+  //* shift under parents when the template, class or ledger changes later.
+  studentName    String
+  className      String?
+  items          Json      //* [{ label, amount }] from the bill template
+  totalAmount    Float     @default(0) //* this term's items
+  arrears        Float     @default(0) //* unpaid balances from earlier terms
+  grandTotal     Float     @default(0)
+  billDate       DateTime  @default(now())
+  resumptionDate DateTime?
+  notes          String?   @db.Text
+  //* Null while a draft. Students and parents only see published bills.
+  publishedAt    DateTime?
+  createdById    String
+  createdByName  String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([studentId, termBillId])
+  @@index([termBillId])
+  @@index([term, academicYear])
+}
+
+model AdmissionBill {
+  id        Int      @id @default(autoincrement())
+  level     String   @unique
+  item      String   @default("Admission Fee & Form")
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ExcursionCampaign {
+  id            Int                @id @default(autoincrement())
+  title         String
+  targetAmount  Float
+  classId       Int
+  class         Class              @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdById   String
+  createdByRole String
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  payments      ExcursionPayment[]
+
+  @@index([classId, updatedAt])
+}
+
+model ExcursionPayment {
+  id             Int               @id @default(autoincrement())
+  campaignId     Int
+  campaign       ExcursionCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  studentId      String
+  student        Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount         Float
+  note           String?           @db.Text
+  recordedById   String?
+  recordedByRole String?
+  paidAt         DateTime          @default(now())
+
+  @@index([campaignId, studentId])
+  @@index([studentId, paidAt])
+}
+
+enum FeeCollectionType {
+  PRINTING_FEE
+  MOCK_FEE
+  SPECIAL_DONATION
+}
+
+enum FeeCollectionStatus {
+  ACTIVE
+  CLOSED
+}
+
+model FeeCollectionCampaign {
+  id             Int                    @id @default(autoincrement())
+  title          String
+  collectionType FeeCollectionType
+  targetAmount   Float
+  status         FeeCollectionStatus    @default(ACTIVE)
+  classId        Int
+  class          Class                  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdById    String
+  createdByRole  String
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  payments       FeeCollectionPayment[]
+
+  @@index([classId, status, updatedAt])
+  @@index([collectionType, status])
+}
+
+model FeeCollectionPayment {
+  id             Int                   @id @default(autoincrement())
+  campaignId     Int
+  campaign       FeeCollectionCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  studentId      String
+  student        Student               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount         Float
+  note           String?               @db.Text
+  recordedById   String?
+  recordedByRole String?
+  paidAt         DateTime              @default(now())
+
+  @@index([campaignId, studentId])
+  @@index([studentId, paidAt])
+}
+
+enum PaymentMethod {
+  CASH
+  MOMO
+  ONLINE
+}
+
+enum UserSex {
+  MALE
+  FEMALE
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
+enum FeeStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model Behavior {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String           @db.Text
+  type        BehaviorType
+  severity    BehaviorSeverity
+  date        DateTime
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id])
+  reportedBy  String
+  actionTaken String?          @db.Text
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model MedicalInfo {
+  id               Int      @id @default(autoincrement())
+  studentId        String   @unique
+  student          Student  @relation(fields: [studentId], references: [id])
+  allergies        String?  @db.Text
+  medications      String?  @db.Text
+  conditions       String?  @db.Text
+  immunizations    String?  @db.Text
+  bloodType        String?
+  emergencyContact String?
+  emergencyPhone   String?
+  doctorName       String?
+  doctorPhone      String?
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Message {
+  id           Int      @id @default(autoincrement())
+  subject      String
+  content      String   @db.Text
+  senderId     String
+  senderType   UserType
+  receiverId   String
+  receiverType UserType
+  read         Boolean  @default(false)
+  starred      Boolean  @default(false)
+  archived     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model UserNote {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  userType    UserType
+  title       String   @default("My Notes")
+  contentHtml String   @db.Text
+  contentText String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, userType, updatedAt])
+}
+
+enum UserType {
+  STUDENT
+  TEACHER
+  PARENT
+  ADMIN
+}
+
+model Document {
+  id         Int      @id @default(autoincrement())
+  title      String
+  type       String
+  fileUrl    String
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id])
+  uploadedBy String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.Text
+  category   String
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id])
+  authorId   String
+  authorName String
+  authorRole String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum BehaviorType {
+  POSITIVE
+  NEGATIVE
+  NEUTRAL
+}
+
+enum BehaviorSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum QuestionType {
+  THEORY
+  MULTIPLE_CHOICE
+}
+
+enum AiWorkspaceRole {
+  STUDENT
+  TEACHER
+}
+
+enum AiConversationKind {
+  STUDY_SUPPORT
+  TEACHING_SUPPORT
+}
+
+enum AiMessageActor {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AiQuizStatus {
+  GENERATED
+  COMPLETED
+  ABANDONED
+}
+
+enum AiQuestionPackSource {
+  TOPIC
+  PDF
+}
+
+model StudentAnswer {
+  id               Int                @id @default(autoincrement())
+  studentId        String
+  student          Student            @relation(fields: [studentId], references: [id])
+  questionId       Int
+  question         AssignmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerText       String?            @db.Text
+  selectedOptionId Int?
+  selectedOption   QuestionOption?    @relation(fields: [selectedOptionId], references: [id])
+  isCorrect        Boolean?
+  pointsEarned     Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@unique([studentId, questionId])
+}
+
+model AiConversation {
+  id            String                  @id @default(uuid())
+  userId        String
+  userRole      AiWorkspaceRole
+  kind          AiConversationKind
+  title         String
+  summary       String?                 @db.Text
+  lessonId      Int?
+  subjectId     Int?
+  metadata      Json?
+  messages      AiConversationMessage[]
+  quizAttempts  AiQuizAttempt[]
+  questionPacks AiQuestionPack[]
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([userId, userRole, updatedAt])
+}
+
+model AiConversationMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  actor          AiMessageActor
+  content        String         @db.Text
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model AiQuizAttempt {
+  id             String          @id @default(uuid())
+  conversationId String?
+  conversation   AiConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  studentId      String
+  student        Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lessonId       Int?
+  subjectId      Int?
+  topic          String
+  difficulty     String
+  status         AiQuizStatus    @default(GENERATED)
+  totalQuestions Int             @default(0)
+  correctAnswers Int             @default(0)
+  scorePercent   Float           @default(0)
+  quizPayload    Json
+  answerPayload  Json?
+  processLog     Json?
+  feedbackText   String?         @db.Text
+  startedAt      DateTime        @default(now())
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([studentId, createdAt])
+  @@index([subjectId, createdAt])
+}
+
+model AiQuestionPack {
+  id                 String               @id @default(uuid())
+  conversationId     String?
+  conversation       AiConversation?      @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  teacherId          String
+  teacher            Teacher              @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  lessonId           Int?
+  subjectId          Int?
+  title              String
+  topic              String?
+  difficulty         String
+  questionCount      Int                  @default(0)
+  sourceType         AiQuestionPackSource
+  sourceName         String?
+  sourceMaterialText String?              @db.Text
+  packPayload        Json
+  notes              String?              @db.Text
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([teacherId, createdAt])
+  @@index([lessonId, createdAt])
+}
+
+model SystemSettings {
+  id                              Int       @id @default(autoincrement())
+  schoolName                      String    @default("Student Management System")
+  schoolShortName                 String    @default("SMS")
+  schoolLogo                      String?
+  schoolStamp                     String?
+  primaryColor                    String    @default("#3b82f6")
+  secondaryColor                  String    @default("#8b5cf6")
+  accentColor                     String    @default("#ec4899")
+  schoolEmail                     String?
+  schoolPhone                     String?
+  schoolAddress                   String?
+  schoolWebsite                   String?
+  publicAppUrl                    String? //* Public URL for fee receipts/links in SMS (e.g., https://school.example.com or https://192.168.1.10)
+  emailHost                       String?
+  emailPort                       Int?
+  emailUser                       String?
+  emailPassword                   String?
+  smsProvider                     String?   @default("mnotify")
+  smsApiKey                       String?
+  smsApiSecret                    String?
+  smsSenderId                     String?
+  whatsappAccessToken             String?
+  whatsappPhoneNumberId           String?
+  whatsappReceiptTemplateName     String?
+  whatsappReceiptTemplateLanguage String    @default("en_US")
+  academicYear                    String    @default("2024-2025")
+  currency                        String    @default("USD")
+  timezone                        String    @default("UTC")
+  dateFormat                      String    @default("MM/dd/yyyy")
+  //* Term/Semester Settings
+  currentTerm                     String    @default("First Term")
+  vacationDate                    DateTime?
+  reopeningDate                   DateTime?
+  totalAttendanceDays             Int       @default(0)
+  studentIdInitials               String    @default("CTS")
+  createdAt                       DateTime  @default(now())
+  updatedAt                       DateTime  @updatedAt
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  userName  String
+  role      String
+  action    String
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+enum AuditLogStatus {
+  SUCCESS
+  FAILURE
+}
+
+model AuditLog {
+  id            String         @id @default(cuid())
+  requestId     String
+  action        String
+  category      String
+  status        AuditLogStatus @default(SUCCESS)
+  actorId       String?
+  actorLoginId  String?
+  actorName     String?
+  actorRole     String?
+  entityType    String?
+  entityId      String?
+  entityLabel   String?
+  source        String         @default("server_action")
+  path          String?
+  ipAddress     String?
+  summary       String
+  metadata      Json?
+  canonicalLine String         @db.Text
+  durationMs    Int?
+  createdAt     DateTime       @default(now())
+
+  @@index([createdAt])
+  @@index([category, createdAt])
+  @@index([action, createdAt])
+  @@index([status, createdAt])
+  @@index([actorId, createdAt])
+  @@index([actorLoginId, createdAt])
+  @@index([entityType, entityId])
+  @@index([requestId])
+}
+
+model Timetable {
+  id           Int      @id @default(autoincrement())
+  title        String
+  semester     String
+  academicYear String
+  targetGroup  String   @default("LOWER_PRIMARY") //* LOWER_PRIMARY | UPPER_PRIMARY | JUNIOR_HIGH
+  fileUrl      String
+  fileType     String //* "PDF" or "IMAGE"
+  uploadedBy   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SmsLog {
+  id        Int      @id @default(autoincrement())
+  sender    String
+  recipient String
+  message   String   @db.Text
+  sentAt    DateTime @default(now())
+}
+
+model CourseSyllabus {
+  id             Int      @id @default(autoincrement())
+  title          String
+  description    String   @db.Text
+  topics         String[] @default([])
+  fileName       String
+  filePath       String
+  fileSizeBytes  Int
+  mimeType       String   @default("application/pdf")
+  subjectId      Int
+  subject        Subject  @relation(fields: [subjectId], references: [id])
+  gradeId        Int
+  grade          Grade    @relation(fields: [gradeId], references: [id])
+  uploadedById   String
+  uploadedByName String
+  uploaderRole   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([gradeId, updatedAt])
+  @@index([subjectId, updatedAt])
+}
+
+model AcademicReferenceMaterial {
+  id             Int      @id @default(autoincrement())
+  category       String
+  title          String
+  description    String   @db.Text
+  resourceType   String
+  fileName       String
+  filePath       String
+  fileSizeBytes  Int
+  mimeType       String   @default("application/pdf")
+  uploadedById   String
+  uploadedByName String
+  uploaderRole   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([category, updatedAt])
+}
+
+model ExamRegulationDocument {
+  id             Int      @id @default(autoincrement())
+  title          String
+  description    String   @db.Text
+  fileName       String
+  filePath       String
+  fileSizeBytes  Int
+  mimeType       String   @default("application/pdf")
+  uploadedById   String
+  uploadedByName String
+  uploaderRole   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([updatedAt])
+}
+
+model VideoLesson {
+  id             Int      @id @default(autoincrement())
+  title          String
+  description    String   @db.Text
+  youtubeUrl     String
+  youtubeVideoId String
+  thumbnailUrl   String
+  subjectId      Int
+  subject        Subject  @relation(fields: [subjectId], references: [id])
+  gradeId        Int
+  grade          Grade    @relation(fields: [gradeId], references: [id])
+  uploadedById   String
+  uploadedByName String
+  uploaderRole   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([gradeId, updatedAt])
+  @@index([subjectId, updatedAt])
+}
+
+model LibraryCatalogItem {
+  id             Int                        @id @default(autoincrement())
+  itemType       LibraryCatalogItemType     @default(BOOK)
+  title          String
+  author         String?
+  isbn           String?
+  category       String
+  gradeRange     String?
+  availability   LibraryCatalogAvailability @default(AVAILABLE)
+  copies         Int                        @default(1)
+  description    String                     @db.Text
+  externalUrl    String?
+  uploadedById   String
+  uploadedByName String
+  uploaderRole   String
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  borrows        LibraryBorrow[]
+
+  @@index([itemType, category, updatedAt])
+}
+
+enum LibraryBorrowStatus {
+  BORROWED
+  RETURNED
+  OVERDUE
+}
+
+model LibraryBorrow {
+  id            Int                 @id @default(autoincrement())
+  itemId        Int
+  item          LibraryCatalogItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  studentId     String
+  student       Student             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  borrowDate    DateTime            @default(now())
+  dueDate       DateTime
+  returnDate    DateTime?
+  status        LibraryBorrowStatus @default(BORROWED)
+  notes         String?             @db.Text
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([studentId, status])
+  @@index([itemId, status])
+}
+
+model InventoryItem {
+  id                Int             @id @default(autoincrement())
+  name              String
+  category          String
+  unit              String          @default("pcs")
+  unitPrice         Float
+  quantityOnHand    Int             @default(0)
+  lowStockThreshold Int             @default(5)
+  notes             String?         @db.Text
+  isActive          Boolean         @default(true)
+  sales             InventorySale[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([category])
+  @@index([name])
+}
+
+enum InventoryBuyerType {
+  STUDENT
+  STAFF
+  OTHER
+}
+
+model InventorySale {
+  id             Int                @id @default(autoincrement())
+  itemId         Int
+  item           InventoryItem      @relation(fields: [itemId], references: [id])
+  itemName       String
+  quantity       Int
+  unitPrice      Float
+  totalAmount    Float
+  buyerType      InventoryBuyerType @default(OTHER)
+  buyerName      String?
+  buyerRefId     String?
+  paymentMethod  PaymentMethod      @default(CASH)
+  note           String?            @db.Text
+  recordedById   String
+  recordedByName String
+  soldAt         DateTime           @default(now())
+  createdAt      DateTime           @default(now())
+
+  @@index([itemId, soldAt])
+  @@index([soldAt])
+  @@index([buyerType])
+}
+
+model DropoutStudent {
+  id               String    @id @default(uuid())
+  username         String    @unique
+  studentId        String    @unique
+  name             String
+  surname          String
+  otherNames       String?
+  email            String?
+  phone            String?
+  address          String?
+  img              String?
+  bloodType        String?
+  sex              UserSex
+  birthday         DateTime
+  residencyStatus  String    @default("DAY")
+  house            String?
+  guardianName     String?
+  contactNumber    String?
+  occupation       String?
+  nhisNumber       String?
+  admissionDate    DateTime?
+  emergencyContact String?
+  nationality      String?
+  firstLanguage    String?
+  dropoutDate      DateTime  @default(now())
+  dropoutReason    String?   @db.Text
+  originalClass    String?
+  originalGrade    String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model OldStudent {
+  id              String    @id @default(uuid())
+  username        String    @unique
+  studentId       String    @unique
+  name            String
+  surname         String
+  otherNames      String?
+  email           String?
+  phone           String?
+  address         String?
+  img             String?
+  bloodType       String?
+  sex             UserSex
+  birthday        DateTime
+  residencyStatus String    @default("DAY")
+  house           String?
+  guardianName    String?
+  contactNumber   String?
+  occupation      String?
+  nhisNumber      String?
+  admissionDate   DateTime?
+  graduationDate  DateTime  @default(now())
+  originalClass   String?
+  originalGrade   String?
+  completionYear  Int?
+  outstandingArrears Float    @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model LoginAttempt {
+  id          Int       @id @default(autoincrement())
+  identifier  String    @unique // staffId / studentId / parentUserId (lowercase)
+  failedCount Int       @default(0)
+  lockedUntil DateTime?
+  lastAttempt DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SavedReportCard {
+  id           String   @id @default(uuid())
+  studentName  String
+  className    String
+  term         String
+  academicYear String
+  level        String
+  savedBy      String? // ID of the user who saved it
+  studentId    String?
+  student      Student? @relation(fields: [studentId], references: [id])
+  cardData     Json // complete report card data
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([className, term, academicYear])
+  @@index([studentName])
+}
+
+model ReportCardEntry {
+  id           String   @id @default(uuid())
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectName  String
+  term         String
+  academicYear String
+  classScore   String   @default("")
+  examScore    String   @default("")
+  total        String   @default("")
+  grade        String   @default("")
+  remarks      String   @default("")
+  savedBy      String   // teacherId who saved this entry
+  savedByName  String   // teacher display name
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([studentId, subjectName, term, academicYear])
+  @@index([studentId, term, academicYear])
+  @@index([savedBy, term, academicYear])
+}
+
+model StoredReportArchive {
+  id           String   @id @default(uuid())
+  title        String
+  fileUrl      String
+  academicYear String
+  term         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+//* ===========================
+//* NOTIFICATION SYSTEM MODELS
+//* ===========================
+
+enum NotificationType {
+  ANNOUNCEMENT
+  ASSIGNMENT
+  EXAM
+  FEE_REMINDER
+  MEETING_REQUEST
+  MEETING_REMINDER
+  MEETING_CONFIRMATION
+  BEHAVIOR
+  ATTENDANCE
+  GENERAL
+}
+
+enum NotificationChannel {
+  IN_APP
+  PUSH
+  EMAIL
+  SMS
+}
+
+model Notification {
+  id            Int                 @id @default(autoincrement())
+  title         String
+  message       String              @db.Text
+  type          NotificationType
+  channel       NotificationChannel @default(IN_APP)
+  recipientId   String?
+  recipientType UserType?
+  classId       Int?
+  class         Class?              @relation(fields: [classId], references: [id])
+  isRead        Boolean             @default(false)
+  sentAt        DateTime            @default(now())
+  readAt        DateTime?
+  metadata      Json? //* Additional data like assignmentId, feeId, meetingId, etc.
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([recipientId, isRead])
+  @@index([classId, isRead])
+  @@index([type, sentAt])
+}
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  userType  UserType
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  lastUsed  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, userType, endpoint])
+  @@index([userId, userType])
+}
+
+//* ===========================
+//* EMAIL TEMPLATE SYSTEM
+//* ===========================
+
+enum EmailTemplateCategory {
+  WELCOME
+  FEE_REMINDER
+  ASSIGNMENT_NOTIFICATION
+  EXAM_NOTIFICATION
+  MEETING_REQUEST
+  MEETING_REMINDER
+  MEETING_CONFIRMATION
+  BEHAVIOR_NOTIFICATION
+  ATTENDANCE_ALERT
+  GENERAL_ANNOUNCEMENT
+  PASSWORD_RESET
+  CUSTOM
+}
+
+model EmailTemplate {
+  id         Int                   @id @default(autoincrement())
+  name       String                @unique
+  category   EmailTemplateCategory
+  subject    String
+  bodyHtml   String                @db.Text
+  bodyText   String?               @db.Text
+  variables  String[]              @default([]) //* List of variable names like {{studentName}}, {{amount}}, etc.
+  isActive   Boolean               @default(true)
+  isSystem   Boolean               @default(true) //* System templates can't be deleted
+  lastUsedAt DateTime?
+  usageCount Int                   @default(0)
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  logs       EmailLog[]
+
+  @@index([category, isActive])
+}
+
+model EmailLog {
+  id           Int            @id @default(autoincrement())
+  templateId   Int?
+  template     EmailTemplate? @relation(fields: [templateId], references: [id])
+  recipient    String
+  subject      String
+  status       EmailStatus    @default(PENDING)
+  sentAt       DateTime?
+  errorMessage String?        @db.Text
+  metadata     Json?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([recipient, createdAt])
+  @@index([status, createdAt])
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+//* ===========================
+//* PARENT-TEACHER MEETING SCHEDULER
+//* ===========================
+
+enum MeetingStatus {
+  PENDING
+  CONFIRMED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum MeetingType {
+  IN_PERSON
+  VIRTUAL
+  PHONE_CALL
+}
+
+model ParentTeacherMeeting {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String?       @db.Text
+  meetingType MeetingType   @default(IN_PERSON)
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  location    String? //* Room number or virtual meeting link
+  status      MeetingStatus @default(PENDING)
+
+  //* Participants
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+  parentId  String
+  parent    Parent   @relation(fields: [parentId], references: [id])
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id])
+
+  //* Scheduling
+  requestedBy        UserType
+  requestedAt        DateTime  @default(now())
+  confirmedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?   @db.Text
+
+  //* Reminders
+  reminderSent   Boolean   @default(false)
+  reminderSentAt DateTime?
+
+  //* Notes
+  teacherNotes     String? @db.Text
+  parentNotes      String? @db.Text
+  followUpRequired Boolean @default(false)
+  followUpNotes    String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teacherId, date])
+  @@index([parentId, date])
+  @@index([studentId, date])
+  @@index([status, date])
+}
+
+model MeetingAvailability {
+  id        Int       @id @default(autoincrement())
+  teacherId String
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  dayOfWeek Int //* 0-6 (Sunday-Saturday)
+  startTime String //* "09:00"
+  endTime   String //* "17:00"
+  isActive  Boolean   @default(true)
+  startDate DateTime?
+  endDate   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([teacherId, isActive])
+}
+
+model MeetingBlackout {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  startTime   DateTime
+  endTime     DateTime
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([startTime, endTime])
+}
+
+//* ===========================
+//* HR MODULE MODELS
+//* ===========================
+
+// ─── Payroll ────────────────────────────────────────────────────────────────
+
+enum PayrollStatus {
+  DRAFT
+  APPROVED
+  PAID
+}
+
+model PayrollRun {
+  id           Int            @id @default(autoincrement())
+  period       String         //* e.g. "2025-01" (YYYY-MM) or "2025 Term 1"
+  periodType   String         @default("MONTHLY") //* MONTHLY | TERM
+  status       PayrollStatus  @default(DRAFT)
+  totalGross   Float          @default(0)
+  totalNet     Float          @default(0)
+  currency     String         @default("GHS")
+  notes        String?        @db.Text
+  createdById  String
+  createdByName String
+  approvedById String?
+  approvedByName String?
+  approvedAt   DateTime?
+  paidAt       DateTime?
+  entries      PayrollEntry[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([period])
+}
+
+model PayrollEntry {
+  id             Int        @id @default(autoincrement())
+  runId          Int
+  run            PayrollRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  staffId        String     //* References Staff.id or Teacher.id or Admin.id
+  staffName      String
+  staffType      String     //* "ADMIN" | "TEACHER"
+  staffProfileId String?    //* Unified Staff.staffId for display
+  grossSalary    Float
+  taxDeduction   Float      @default(0)
+  ssnitDeduction Float      @default(0)
+  otherDeductions Float     @default(0)
+  netSalary      Float
+  notes          String?    @db.Text
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([runId, staffId])
+  @@index([runId])
+  @@index([staffId])
+}
+
+// ─── Payslips ───────────────────────────────────────────────────────────────
+
+model Payslip {
+  id              Int      @id @default(autoincrement())
+  staffId         String   //* References Staff.id or Teacher.id or Admin.id (same as PayrollEntry)
+  staffType       String   //* "ADMIN" | "TEACHER"
+  salaryMonth     String   //* "YYYY-MM"
+  //* Employee details are a snapshot: editable per payslip, so a reprint
+  //* always shows what was issued even after the staff profile changes.
+  employeeId      String?
+  title           String?
+  fullName        String
+  designation     String?
+  gradeLevel      String?
+  phone           String?
+  email           String?
+  bankName        String?
+  accountNumber   String?
+  bankBranch      String?
+  ssnitNumber     String?
+  ssnitBranch     String?
+  //* Line items are [{ label, amount }] so schools can rename, add or drop rows.
+  earnings        Json
+  otherClaims     Json
+  deductions      Json
+  otherDeductions Json
+  grossSalary     Float    @default(0) //* earnings only
+  totalGross      Float    @default(0) //* earnings + other claims
+  totalDeductions Float    @default(0)
+  netSalary       Float    @default(0)
+  preparedBy      String?
+  footerNote      String?  @db.Text
+  //* Null while a draft. Teachers only see published payslips in My Payslips.
+  publishedAt     DateTime?
+  createdById     String
+  createdByName   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([staffId, salaryMonth])
+  @@index([salaryMonth])
+}
+
+// ─── Leave ──────────────────────────────────────────────────────────────────
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  MATERNITY
+  PATERNITY
+  UNPAID
+  EMERGENCY
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model LeaveRequest {
+  id             Int         @id @default(autoincrement())
+  staffId        String      //* References Staff.id (unified) or Teacher/Admin.id
+  staffName      String
+  staffType      String      //* "ADMIN" | "TEACHER"
+  staffProfileId String?     //* Staff.staffId for display
+  leaveType      LeaveType
+  startDate      DateTime
+  endDate        DateTime
+  totalDays      Int
+  reason         String      @db.Text
+  status         LeaveStatus @default(PENDING)
+  reviewedById   String?
+  reviewedByName String?
+  reviewNote     String?     @db.Text
+  reviewedAt     DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@index([staffId, createdAt])
+  @@index([status, startDate])
+  @@index([leaveType, status])
+}
+
+// ─── Appraisals ─────────────────────────────────────────────────────────────
+
+enum AppraisalCycleStatus {
+  OPEN
+  CLOSED
+}
+
+enum AppraisalRecommendation {
+  PROMOTE
+  RETAIN
+  IMPROVE
+  DISMISS
+}
+
+model AppraisalCycle {
+  id          Int                  @id @default(autoincrement())
+  title       String
+  period      String               //* e.g. "2025 Term 1"
+  startDate   DateTime
+  endDate     DateTime
+  status      AppraisalCycleStatus @default(OPEN)
+  description String?              @db.Text
+  createdById String
+  createdByName String
+  closedAt    DateTime?
+  records     AppraisalRecord[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([status, startDate])
+}
+
+model AppraisalRecord {
+  id               Int                     @id @default(autoincrement())
+  cycleId          Int
+  cycle            AppraisalCycle          @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  staffId          String
+  staffName        String
+  staffType        String
+  staffProfileId   String?
+  score            Int                     //* 1–5
+  teachingScore    Int?                    //* For teachers: specific teaching dimension
+  professionalScore Int?
+  conductScore     Int?
+  comments         String?                 @db.Text
+  strengths        String?                 @db.Text
+  improvements     String?                 @db.Text
+  recommendation   AppraisalRecommendation @default(RETAIN)
+  reviewerId       String
+  reviewerName     String
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  @@unique([cycleId, staffId])
+  @@index([cycleId])
+  @@index([staffId])
+  @@index([recommendation])
+}
+
+model TimetablePeriod {
+  id        Int              @id @default(autoincrement())
+  name      String           //* e.g. "Period 1", "Break", "Period 3"
+  startTime String           //* e.g. "07:30"
+  endTime   String           //* e.g. "08:10"
+  order     Int              @default(1)
+  isBreak   Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  entries   TimetableEntry[]
+}
+
+model ScheduleTimetable {
+  id           Int              @id @default(autoincrement())
+  classId      Int
+  class        Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  term         String           //* e.g. "Term 1", "Term 2", "Term 3"
+  academicYear String           //* e.g. "2024-2025"
+  isPublished  Boolean          @default(false)
+  publishedAt  DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  entries      TimetableEntry[]
+
+  @@unique([classId, term, academicYear])
+}
+
+model TimetableEntry {
+  id          Int               @id @default(autoincrement())
+  timetableId Int
+  timetable   ScheduleTimetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  periodId    Int
+  period      TimetablePeriod   @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  day         Day               //* MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY
+  subjectId   Int?
+  subject     Subject?          @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  teacherId   String?
+  teacher     Teacher?          @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  note        String?           //* e.g. "Assembly", "Sports"
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([timetableId, periodId, day])
+}
+
+model ClassMigrationSnapshot {
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  migrationType  String    // "TOTAL" | "INDIVIDUAL"
+  description    String
+  studentCount   Int       @default(0)
+  graduatedCount Int       @default(0)
+  revertedAt     DateTime?
+  revertedBy     String?
+  snapshotData   Json
+
+  @@index([createdAt(sort: Desc)])
+  @@index([revertedAt])
+}
+
+
