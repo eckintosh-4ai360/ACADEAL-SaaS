@@ -1,0 +1,5 @@
+ALTER TABLE "Admin"
+ADD COLUMN IF NOT EXISTS "permissions" JSONB;
+
+ALTER TABLE "Teacher"
+ADD COLUMN IF NOT EXISTS "permissions" JSONB;
