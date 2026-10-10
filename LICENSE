@@ -1,0 +1,22 @@
+Copyright (c) 2026 Eckintosh. All rights reserved.
+
+This software and its source code are proprietary and confidential.
+
+No permission is granted to any person to copy, modify, merge, publish,
+distribute, sublicense, sell, or create derivative works from any part of this
+software, in source or compiled form, without prior written permission from the
+copyright holder.
+
+Access to this repository, or to a deployed instance of this software, does not
+transfer any ownership or licence in the software itself. Schools and other
+customers are granted a limited right to use the hosted service under their own
+service agreement; that right does not extend to the source code.
+
+Third-party dependencies listed in package.json remain under their own licences.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
